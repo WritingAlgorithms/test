@@ -98,6 +98,10 @@ socket.on('updateKeyPress', function(keyData) {
 socket.on('updateKeyRelease', function(keyData) {
     console.log("key released");
     tanks[keyData.tankId].state[keyData.property] = keyData.value;
+    tanks[keyData.tankId].sprite.x = keyData.x;
+    tanks[keyData.tankId].sprite.y = keyData.y;
+    tanks[keyData.tankId].sprite.rotation = keyData.rotation;
+
 });
 
 socket.on('setBallState', function(stateData) {
@@ -121,19 +125,38 @@ function gameLoop(delta) {
     if (tanks[socket.id].state.moveForward == false) {
         up.press = function() { socket.emit('keyboardPress', { tankId: socket.id, property: 'moveForward', value: true }) };
     } else if (tanks[socket.id].state.moveForward == true) {
-        up.release = function() { socket.emit('keyboardRelease', { tankId: socket.id, property: 'moveForward', value: false }) };
+        up.release = function() { 
+            socket.emit('keyboardRelease', { 
+                tankId: socket.id, property: 'moveForward', value: false,
+                x: tanks[socket.id].sprite.x,
+                y: tanks[socket.id].sprite.y,
+                rotation: tanks[socket.id].sprite.rotation
+            }) 
+        };
     }
 
     if (tanks[socket.id].state.rotateLeft == false) {
         left.press = function() { socket.emit('keyboardPress', { tankId: socket.id, property: 'rotateLeft', value: true }) };
     } else if (tanks[socket.id].state.rotateLeft == true) {
-        left.release = function() { socket.emit('keyboardRelease', { tankId: socket.id, property: 'rotateLeft', value: false }) };
+        left.release = function() { socket.emit('keyboardRelease', { 
+                tankId: socket.id, property: 'rotateLeft', value: false,
+                x: tanks[socket.id].sprite.x,
+                y: tanks[socket.id].sprite.y,
+                rotation: tanks[socket.id].sprite.rotation
+            }) 
+        };
     }
 
     if (tanks[socket.id].state.rotateRight == false) {
         right.press = function() { socket.emit('keyboardPress', { tankId: socket.id, property: 'rotateRight', value: true }) };
     } else if (tanks[socket.id].state.rotateRight == true) {
-        right.release = function() { socket.emit('keyboardRelease', { tankId: socket.id, property: 'rotateRight', value: false }) };
+        right.release = function() { socket.emit('keyboardRelease', { 
+               tankId: socket.id, property: 'rotateRight', value: false,
+               x: tanks[socket.id].sprite.x,
+               y: tanks[socket.id].sprite.y,
+               rotation: tanks[socket.id].sprite.rotation
+            }) 
+        };
     }
 
 
@@ -161,7 +184,7 @@ function gameLoop(delta) {
             tanks[tankid].barrel.y = tanks[tankid].sprite.y;
 
             for (var ballid in balls) {
-                let tankCollided = bump.hit(tanks[tankid].sprite, balls[ballid].sprite, false, false, false, function(collision, othersprite) {
+                let tankCollided = bump.hit(tanks[socket.id].sprite, balls[ballid].sprite, false, false, false, function(collision, othersprite) {
                     // collided
                 });
                 if (tankCollided && balls[ballid].state == 'idle') {
