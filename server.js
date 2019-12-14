@@ -18,6 +18,7 @@ app.get('/', (req, res) => {
 
 const WAIT_N_PLAYERS = 2;
 var tanks = {};
+var balls = {};
 const server = app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 const io = socketIO(server);
 
@@ -29,6 +30,12 @@ io.on('connection', function(socket) {
     setTimeout(function() {
       io.emit('initTankData', tanks);
       console.log('sent init data');
+      setTimeout(function() {
+        io.emit('initBallsData', [
+          { ballId: 'ball1', color: 'purple', startX: 500, startY: 250 }
+        ]);
+        console.log('init balls');
+      }, 1500);
     }, 1500);
   }
 
@@ -43,8 +50,19 @@ io.on('connection', function(socket) {
     io.emit('updateKeyRelease', keyData);
   });
 
+  socket.on('changeBallState', function(stateData) {
+    io.emit('setBallState', stateData);
+  });
+
   socket.on('disconnect', function() {
     console.log('Client disconnected ' + socket.id);
+    delete tanks[socket.id];
+    io.emit('disconnected', { tankId: socket.id });
   });
 
 });
+
+
+
+
+
